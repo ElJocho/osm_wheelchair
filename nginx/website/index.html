@@ -29,13 +29,24 @@
 
     <!--Include own css-->
     <link type="text/css" rel="stylesheet" href="assets/css/style.css">
-
+    <script src="assets/js/utils.js"></script>
 </head>
 <body>
 
-    <header></header>
+    <header>
+        <img src="assets/img/logo.png" alt="osm wheelchair logo" >
+    </header>
     <main>
         <h1>OSM Wheelchair</h1>
+
+        <div class="plotly-wrapper">
+            <div class="plotly-plot" id="progress">
+              <!--plot per js-->
+            </div>
+            <p id="tm_contributors_desc" class="plot-description"></p>
+        </div>
+        <script src="assets/js/index.js"></script>
+
     </main>
     <footer></footer>
 </body>

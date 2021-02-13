@@ -9,6 +9,8 @@ services:
       OHSOME_API: '${OHSOME_API}'
     command: wheelchair
     restart: "unless-stopped"
+    volumes:
+      - ./data/:/root/.local/share/wheelchair
     ports:
       - "8080:8000"
 
@@ -18,5 +20,8 @@ services:
       context: nginx/
       dockerfile: Dockerfile
     restart: "unless-stopped"
+    volumes:
+      - ./nginx/website:/usr/share/nginx/html
+      - ./data:/usr/share/nginx/html/data:ro
     ports:
       - "8083:83"
