@@ -28,6 +28,7 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
     <!--Include own css-->
+    <link type="text/css" rel="stylesheet" href="assets/css/style_map.css">
     <link type="text/css" rel="stylesheet" href="assets/css/style.css">
     <script src="assets/js/utils.js"></script>
 </head>
@@ -37,8 +38,17 @@
         <img src="assets/img/logo.png" alt="osm wheelchair logo" >
     </header>
     <main>
-        <h1>OSM Wheelchair</h1>
-
+        <div class="first_impressions">
+            <h1>OSM Wheelchair</h1>
+            <p>Reason this website exists</p>
+            <!--TODO: find a nice backgroundimage (Happy wheelchairer with map maby?)-->
+        </div>
+        <div class="current_situation">
+            <h2>Current Situation in your City</h2>
+            <p>This map shows some details on how wheelchair-friendly your neighborhood is</p>
+            <div id="map_div"></div>
+            <script src="assets/js/map.js"></script>
+        </div>
         <div class="plotly-wrapper">
             <div class="plotly-plot" id="progress">
               <!--plot per js-->

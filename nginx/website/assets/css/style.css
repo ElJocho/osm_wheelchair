@@ -1,0 +1,10 @@
+#map_div {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    min-height: 500px;
+}
+
+.current_situation {
+    margin: 0 20%;
+}
