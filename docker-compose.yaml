@@ -1,0 +1,22 @@
+version: "3"
+services:
+  wheelchair-workers:
+    container_name: wheelchair-workers
+    build:
+      context: python/
+      dockerfile: Dockerfile
+    environment:
+      OHSOME_API: '${OHSOME_API}'
+    command: wheelchair
+    restart: "unless-stopped"
+    ports:
+      - "8080:8000"
+
+  wheelchair-website:
+    container_name: wheelchair-website
+    build:
+      context: nginx/
+      dockerfile: Dockerfile
+    restart: "unless-stopped"
+    ports:
+      - "8083:83"
