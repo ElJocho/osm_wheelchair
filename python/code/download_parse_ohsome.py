@@ -67,32 +67,31 @@ def parseJson(bpoly_path,csv_path):
             else: 
                 continue
 
-        if -1 not in feature_score:
-            tot_score = sum(feature_score)
-        else: 
+        if -1 in feature_score:
             tot_score = -1
-
-        props["wheelchair_score"] = tot_score
-
-        if len(feature_score) == 0:
+        elif len(feature_score) == 0:
             tot_score = -2
             untagged += 1
         else:
+            tot_score = sum(feature_score)/len(feature_score)
             props["wheelchair_tags"] = len(feature_score)
             tagged += 1
 
+        props["wheelchair_score"] = tot_score
+
     tagging_rel = {'tagging_relationship':{'tagged_cnt':tagged, 'untagged_cnt':untagged}}
 
-    outfile = Path(bpoly_path).stem
-    outpath = os.path.join(os.path.dirname(__file__), "output")
+    out_basename = Path(bpoly_path).stem
+    out_basepath = os.path.join(os.path.dirname(__file__), "../../output")
 
-    with open(f"{outpath}/{outfile}_data.geojson", "w") as outfile:
+    with open(f"{out_basepath}/{out_basename}_data.geojson", "w") as outfile:
         json.dump(data, outfile)
 
-    with open(f"{outpath}/{outfile}_tags.geojson", "w") as outfile:
-        json.dump(tagging_rel, outfile)
+    with open(f"{out_basepath}/{out_basename}_tags.json", "w") as outtags:
+        json.dump(tagging_rel, outtags)
 
 if __name__ == "__main__":
-    bpoly_path = sys.argv[0]
-    csv_path = sys.argv[1]
+    bpoly_path = sys.argv[1]
+    csv_path = sys.argv[2]
+    years_path = sys.argv[3]
     parseJson(bpoly_path,csv_path)
