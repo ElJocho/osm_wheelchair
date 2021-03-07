@@ -12,17 +12,16 @@ let map = L.map('map_div', {
   function initMap(map) {
 
     // load geojson file
-    /*let list = new get_html_parameter_list(location.search)
+    let list = new get_html_parameter_list(location.search)
     let loc = list["location"]
     if (loc === undefined){
         loc="heidelberg"
     }
-    */
-    L.tileLayer( 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
-    attribution: 'Map tiles by <a href="https://carto.com/">Carto</a>, under <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0.</a> Data by <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, under ODbL.',
-    }).addTo( map );
+    
+    let area_of_interest = "data/geojson/".concat(loc, ".geojson")
+    addGeojsonLayer(map, area_of_interest);
 
-    //pois = "api/export/".concat(loc, "/project_activity_sessions_per_month.geojson");
+    //let pois = "api/export/".concat(loc, "/project_activity_sessions_per_month.geojson");
     setTimeout(function(){ map.invalidateSize()}, 0);
     //addGeojsonLayer(map, pois);
     
@@ -57,3 +56,54 @@ let map = L.map('map_div', {
     }
 }
 
+function addGeojsonLayer (map, url) {
+
+    try{
+        map.eachLayer(function (layer) {
+
+        map.removeLayer(layer);
+    });
+    }
+    catch{
+        console.log("nothing to catch")
+    }
+
+    L.tileLayer( 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+        attribution: 'Map tiles by <a href="https://carto.com/">Carto</a>, under <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0.</a> Data by <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, under ODbL.',
+    }).addTo( map );
+
+    var geojsonData = $.ajax({
+        url:url,
+        dataType: "json",
+        success: console.log("geojson data successfully loaded."),
+        error: function (xhr) {
+        alert(xhr.statusText)
+        }
+    })
+    // Specify that this code should run once the county data request is complete
+    /*$.when(geojsonData).done(function() {
+        // define default point style
+        var geojsonMarker = {
+            radius: 6,
+            fillColor: "grey",
+            color: "white",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+    */
+        // create geojson layer
+        // classification layer
+        layer = L.geoJSON(geojsonData.responseJSON, {
+            pointToLayer: function (feature, latlng) {
+                let marker = L.circleMarker(latlng, geojsonMarker);
+                marker.on("click", function(data) {
+                    circleMarkerClick(data, map)
+                });
+                return marker;
+            }        
+            }).addTo(map)
+        
+
+  }
+  

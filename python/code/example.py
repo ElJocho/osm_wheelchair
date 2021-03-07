@@ -9,7 +9,7 @@ OHSOME_API = "https://api.ohsome.org/v1/"
 
 
 def query(tags, bpolys: str, time: str = None, endpoint: str = None):
-    """Query ohsome API endpoint with filter."""
+    """Query ohsome API endpoint."""
 
     url = OHSOME_API + endpoint
 
