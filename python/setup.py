@@ -13,7 +13,7 @@ setup(
     name="osm_wheelchair",
     version="1.0",
     description="Install script for the osm_wheelchair package.",
-    author="J.Keaflein, T.Schneider, J.Stier",
+    author="J.Kaeflein, T.Schneider, J.Stier",
     author_email="stier.jochen@web.de",
     url="",
     packages=find_packages(exclude=("tests", "docs")),
