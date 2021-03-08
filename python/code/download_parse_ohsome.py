@@ -11,81 +11,80 @@ TODO: adjust path to project
 import sys
 import csv 
 import json
+from geojson import FeatureCollection
 import requests
 from pathlib import Path
 import os
 
 def read_csv(csv_path):
 
-    with open(csv_path) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=';')
-        for key,value,score in csv_reader:
-            print("scoring:", key,value,score)
+    scores = read_csv(csv_path)
+    
+    wh_yes = 0
+    wh_limited=  0
+    wh_no = 0
 
-    return  key,value,float(score)
-
-
-def downloadData(bpoly_path):
-
-    with open(bpoly_path) as bpoly_file:
-        bpoly = bpoly_file.read()
-
-    request_url = f"https://api.ohsome.org/v1/elements/geometry?bpolys={bpoly}&clipGeometry=true&filter=type%3Away%20and%20highway%3D*&properties=tags&time=2021-01-01&timeout=60"
-
-    print("Downloading...")
-    try:
-        response = requests.post(request_url)
-        response.raise_for_status()
-        response_text = response.text
-    except requests.exceptions.HTTPError as http_err:
-        print(f'HTTP error: {http_err}')
-    except Exception as err:
-        print(f'Error occurred: {err}')
-
-    data = json.loads(response_text)
-
-    return data
-
-
-def parseJson(bpoly_path,csv_path):
-
-    data = downloadData(bpoly_path)
-    score_k,score_v,score = read_csv(csv_path)
-
-    tagged = 0
-    untagged = 0
+    polys = []
+    points = []
+    lines = []
+    untagged = []
 
     for i in data["features"]:
-        geom = i["geometry"]["coordinates"] 
+        geomtype = i["geometry"]["type"] 
         props = i["properties"] 
         feature_score = []
-
+        tot_score = None 
+        
         for key,val in props.items():
+            
+            for score_k,score_v,score in scores:
 
-            if score_k == key and score_v == val:
-                feature_score.append(score)
-            else: 
-                continue
+                if(str(key) == "wheelchair" and str(val) == "no"):
+                    wh_no += 1
+                if(str(key) == "wheelchair" and str(val) == "limited"):
+                    wh_limited += 1
+                if(str(key) == "wheelchair" and str(val) == "yes"):
+                    wh_yes += 1
+                    feature_score = [1]
+                    break
+                elif score_k == key and score_v == val:
+                    feature_score.append(score)
 
-        if -1 in feature_score:
-            tot_score = -1
-        elif len(feature_score) == 0:
+        if len(feature_score) > 0:
+            if -1 in feature_score:
+                tot_score = -1
+            tot_score = sum(feature_score)/len(feature_score)
+        else:
             tot_score = -2
             untagged += 1
-        else:
-            tot_score = sum(feature_score)/len(feature_score)
-            props["wheelchair_tags"] = len(feature_score)
-            tagged += 1
 
+        props["wheelchair_tags"] = len(feature_score)
         props["wheelchair_score"] = tot_score
 
-    tagging_rel = {'tagging_relationship':{'tagged_cnt':tagged, 'untagged_cnt':untagged}}
+        if(geomtype == "Point"):
+            points.append(i)
+        elif(geomtype == "Polygon"):
+            polys.append(i)
+        elif(geomtype == "LineString"):
+            lines.append(i)
+
+    points = FeatureCollection(points)
+    polys = FeatureCollection(polys)
+    lines = FeatureCollection(lines)
+
+    tagging_rel = {'tagging_relationship':{'yes':wh_yes, 'limited':wh_limited, 'no':wh_no, 'untagged':untagged}}
 
     out_basename = Path(bpoly_path).stem
-    out_basepath = os.path.join(os.path.dirname(__file__), "../../output")
+    out_basepath = os.path.join(os.path.dirname(__file__), "../../data/result")
 
-    with open(f"{out_basepath}/{out_basename}_data.geojson", "w") as outfile:
-        json.dump(data, outfile)
+    with open(f"{out_basepath}/{out_basename}_pts.geojson", "w") as pts_out:
+        json.dump(points, pts_out)
+
+    with open(f"{out_basepath}/{out_basename}_polys.geojson", "w") as poly_out:
+        json.dump(polys, poly_out)
+
+    with open(f"{out_basepath}/{out_basename}_lines.geojson", "w") as lines_out:
+        json.dump(lines, lines_out)
 
     with open(f"{out_basepath}/{out_basename}_tags.json", "w") as outtags:
         json.dump(tagging_rel, outtags)
@@ -94,4 +93,4 @@ if __name__ == "__main__":
     bpoly_path = sys.argv[1]
     csv_path = sys.argv[2]
     years_path = sys.argv[3]
-    parseJson(bpoly_path,csv_path)
+    parseJson(bpoly_path,csv_path,years_path)
