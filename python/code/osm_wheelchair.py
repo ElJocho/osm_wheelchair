@@ -18,6 +18,7 @@ from pathlib import Path
 import os
 from python.code.utils.ohsome import query
 from python.code.utils.definitions import logger
+from python.code.get_timeseries import get_ts
 
 # define some basic variables
 INPUT_PATH = "./data/input"
@@ -136,7 +137,8 @@ def score_layer(dimensions=None):
             if len(feature_score) > 0:
                 if -1 in feature_score:
                     tot_score = -1
-                tot_score = sum(feature_score) / len(feature_score)
+                else: 
+                    tot_score = sum(feature_score) / len(feature_score)
             else:
                 tot_score = -2
                 untagged += 1
@@ -156,8 +158,8 @@ def score_layer(dimensions=None):
         json.dump(tagging_rel, outtags)
     """
 
-
-
+def get_timeseries(geojson_path):
+    get_ts(geojson_path)
 
 def execute_workflow(download: bool = False):
     dimensions = None
