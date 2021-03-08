@@ -5,9 +5,9 @@ from python.code.utils.definitions import DATA_PATH, logger
 
 def to_json(filename, key, value):
     """Drop country results."""
-    path = os.path.join(DATA_PATH, filename)
+
     try:
-        with open(path) as file:
+        with open(filename) as file:
             data = json.load(file)
     except FileNotFoundError:
         logger.info(
@@ -19,5 +19,5 @@ def to_json(filename, key, value):
 
     data[key] = value
 
-    with open(path, "w") as f:
+    with open(filename, "w") as f:
         json.dump(data, f)

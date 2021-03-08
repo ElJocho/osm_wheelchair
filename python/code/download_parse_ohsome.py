@@ -53,7 +53,8 @@ def read_csv(csv_path):
         if len(feature_score) > 0:
             if -1 in feature_score:
                 tot_score = -1
-            tot_score = sum(feature_score)/len(feature_score)
+            else:
+                tot_score = sum(feature_score)/len(feature_score)
         else:
             tot_score = -2
             untagged += 1

@@ -1,4 +1,7 @@
 function plot_key_progress() {
+
+
+
     let data_progress = get_json("data/result".concat("/example2.json"));
 
 
@@ -28,12 +31,14 @@ function plot_key_progress() {
         xaxis: {
             type: "date",
             dtick:"M12",
-            fixedrange: true
+            fixedrange: true,
+            automargin:true
         },
         yaxis: {
             fixedrange: true,
             title: "share work done",
-            tickformat: '.2f'
+            tickformat: '.2f',
+            automargin:true
         },
         legend: {
             y:1,
@@ -53,4 +58,4 @@ function plot_key_progress() {
     setLinePlot("Progress", input_progress, contributions)
 
 }
-plot_key_progress()
+fill_aoi_dropdown([update_map,plot_key_progress])

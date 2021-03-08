@@ -18,11 +18,14 @@ from pathlib import Path
 import os
 from python.code.utils.ohsome import query
 from python.code.utils.definitions import logger
+from os import walk
+from python.code.utils.utils import to_json
 
 # define some basic variables
 INPUT_PATH = "./data/input"
 RESULT_PATH = "./data/result"
 GEOJSON_PATH = "./data/geojson"
+AREA_OF_INTEREST_PATH = "./data/areas_of_interest"
 csv_path = os.path.join(INPUT_PATH, "tabelle_2.csv")
 geojson_path = os.path.join(INPUT_PATH, "area_of_interest.geojson")
 
@@ -76,7 +79,7 @@ def read_csv(csv_path):
     return scores
 
 
-def load_ohsome_layers(geojson_path, csv_path):
+def load_ohsome_layers(geojson_path, csv_path, geojson_outpath):
     with open(geojson_path, encoding="utf8") as infile:
         analysis_area = geojson.load(infile)
         analysis_area = geojson.dumps(analysis_area)
@@ -87,19 +90,19 @@ def load_ohsome_layers(geojson_path, csv_path):
 
     dimensions = [roads_geoms, pois_geoms, aois_geoms]
     for x in range(0, len(names)):
-        with open(os.path.join(GEOJSON_PATH, names[x] + ".geojson"), "w") as outpath:
+        with open(os.path.join(geojson_outpath, names[x] + ".geojson"), "w") as outpath:
             geojson.dump(dimensions[x], outpath)
     logger.info("dropped ohsome result into geojson folder.")
     return dimensions
 
 
-def score_layer(dimensions=None):
+def score_layer(dimensions=None, geojson_outpath=None, result_outpath=None):
 
     #  load from file if we do not download and pass them
     if dimensions is None:
         dimensions = []
         for name in names:
-            file_path = os.path.join(GEOJSON_PATH, name + ".geojson")
+            file_path = os.path.join(geojson_outpath, name + ".geojson")
             with open(file_path, "r") as infile:
                 dimensions.append(geojson.load(infile))
 
@@ -145,7 +148,7 @@ def score_layer(dimensions=None):
             props["wheelchair_score"] = tot_score
             feature["properties"] = props
 
-        with open(os.path.join(RESULT_PATH, names[x] + ".geojson"), "w") as outpath:
+        with open(os.path.join(result_outpath, names[x] + ".geojson"), "w") as outpath:
             geojson.dump(dimensions[x], outpath)
     """
     tagging_rel = {
@@ -160,9 +163,21 @@ def score_layer(dimensions=None):
 
 
 def execute_workflow(download: bool = False):
-    dimensions = None
-    if download:
-        dimensions = load_ohsome_layers(geojson_path, csv_path)
-    score_layer(dimensions)
+    _, _, filenames = next(walk(AREA_OF_INTEREST_PATH))
+    f = []
+    for file in filenames:
+        f.append(file[:-8])
+        result_outpath = os.path.join(RESULT_PATH,file[:-8])
+        geojson_outpath = os.path.join(GEOJSON_PATH,file[:-8])
 
+        if not os.path.exists(geojson_outpath):
+            os.mkdir(geojson_outpath)
+            os.mkdir(result_outpath)
+
+        geojson_inpath = os.path.join(AREA_OF_INTEREST_PATH, file)
+        dimensions = None
+        if download:
+            dimensions = load_ohsome_layers(geojson_inpath, csv_path, geojson_outpath)
+        score_layer(dimensions, geojson_outpath, result_outpath)
+    to_json(os.path.join(RESULT_PATH, "valid_dirs.json"), "dirs", f)
 execute_workflow(download=True)

@@ -1,10 +1,17 @@
-#map_div {
+#map {
     margin-left: 0;
     margin-right: 0;
     max-width: 100%;
     min-height: 500px;
 }
 
-.current_situation {
+
+main{
     margin: 0 20%;
+}
+
+.info{
+    background-color: rgba(255, 255, 255,0.8);
+    border-radius: 10px;
+    padding: 10px;
 }
