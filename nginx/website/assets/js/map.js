@@ -11,12 +11,24 @@ function update_map(){
       return this._div;
   };
 
+  function get_tags(props){
+    value = "";
+    (props.highway!=undefined) ? value += '<p>type of street: ' + props.highway + '</p>' : value+="";
+    (props.smoothness!=undefined) ? value += '<p>smoothness: ' + props.smoothness + '</p>'  : value+="";
+    (props.surface!=undefined) ? value += '<p>surface: ' + props.surface + '</p>'  : value+="";
+    (props.incline!=undefined) ? value += '<p>' + props.incline + '% incline </p>' : value+="";
+    (props.sidewalk!=undefined) ? value += '<p>sidewalk on ' + props.sidewalk + ' side(s)</p>'  : value+="";
+    return value
+  }
+
   info.update = function (props) {
 
       this._div.innerHTML = '<h4>Road Characteristics</h4>' +  (props ?
           '<p><b>Score: '+ props.wheelchair_score + '</b></p>' +
-          '<p>' + props.wheelchair_tags + ' wheelchair tags </p>' 
-          
+          '<p>' + props.wheelchair_tags + ' wheelchair tags </p>' +
+          get_tags(props)
+
+
           : '<p>Hover over a Road') 
   };
 
@@ -87,24 +99,44 @@ function update_map(){
     function style(feature) {
       if (feature.properties.wheelchair_score >=0.7 & feature.properties.wheelchair_score <=1) {
           return {
+          color:  '#00c700',
+          }
+      } else if (feature.properties.wheelchair_score >= 0 &feature.properties.wheelchair_score <0.7) {
+          return {
+          color:  '#f3c81b'
+          }
+      } else if (feature.properties.wheelchair_score >= -1 & feature.properties.wheelchair_score < 0){
+          return {
           color:  '#ff0000',
           }
-      } else if (feature.properties.wheelchair_score >= 0.4 &feature.properties.wheelchair_score <0.7) {
-          return {
-          color:  '#119e4a'
-          }
-      } else if (feature.properties.wheelchair_score >= 0 & feature.properties.wheelchair_score < 0.4){
-          return {
-          color:  '#ffff00',
-          }
 
-      } else if (feature.properties.wheelchair_score < 0){
+      } else if (feature.properties.wheelchair_score == -2){
           return {
           color:  '#000000',
           }
 
       }
   }
+
+  var legend = L.control({position: 'bottomright'});
+
+  legend.onAdd = function (map) {
+
+      var div = L.DomUtil.create('div', 'info legend');
+
+      grades = ['#000000','#ff0000', '#f3c81b', '#00c700'];
+      labels = ["No Data", "mainly bad", "neutral", "good"];
+
+      for (var i = 0; i < grades.length; i++) {
+          div.innerHTML +=
+              '<i style="background:' + grades[i] + '"></i> ' +
+              labels[i] + ' </br> ';
+  }
+
+  return div;
+  };
+
+  legend.addTo(map);
 
   function addGeojsonLayer (map, data) {
 

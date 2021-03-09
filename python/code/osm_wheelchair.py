@@ -20,7 +20,7 @@ from python.code.utils.ohsome import query
 from python.code.utils.definitions import logger
 from os import walk
 from python.code.utils.utils import to_json
-from python.code.get_timeseries import get_ts
+from python.code.get_timeseries import get_timeseries, get_num_relevant_tags
 
 # define some basic variables
 INPUT_PATH = "./data/input"
@@ -73,7 +73,7 @@ aois = {
 def read_csv(csv_path):
     scores = []
     with open(csv_path) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=';')
+        csv_reader = csv.reader(csv_file, delimiter=',')
         for key, value, score in csv_reader:
             scores.append([key, value, float(score)])
 
@@ -116,6 +116,8 @@ def score_layer(dimensions=None, geojson_outpath=None, result_outpath=None):
     polys = []
     points = []
     lines = []
+
+
     for x in range(0, len(dimensions)):
         for feature in dimensions[x]["features"]:
             props = feature["properties"]
@@ -136,7 +138,6 @@ def score_layer(dimensions=None, geojson_outpath=None, result_outpath=None):
                         break
                     elif score_k == key and score_v == val:
                         feature_score.append(score)
-
             if len(feature_score) > 0:
                 if -1 in feature_score:
                     tot_score = -1
@@ -150,19 +151,11 @@ def score_layer(dimensions=None, geojson_outpath=None, result_outpath=None):
             props["wheelchair_score"] = tot_score
             feature["properties"] = props
 
+
+
         with open(os.path.join(result_outpath, names[x] + ".geojson"), "w") as outpath:
             geojson.dump(dimensions[x], outpath)
-    """
-    tagging_rel = {
-        'tagging_relationship': {'yes': wh_yes, 'limited': wh_limited, 'no': wh_no,
-                                 'untagged': untagged}}
 
-    with open(f"{out_basepath}/{out_basename}_tags.json", "w") as outtags:
-        json.dump(tagging_rel, outtags)
-    """
-
-def get_timeseries(geojson_path):
-    get_ts(geojson_path)
 
 def execute_workflow(download: bool = False):
     _, _, filenames = next(walk(AREA_OF_INTEREST_PATH))
@@ -181,5 +174,9 @@ def execute_workflow(download: bool = False):
         if download:
             dimensions = load_ohsome_layers(geojson_inpath, csv_path, geojson_outpath)
         score_layer(dimensions, geojson_outpath, result_outpath)
+        get_timeseries(geojson_inpath, result_outpath)
+        get_num_relevant_tags(geojson_inpath, result_outpath)
+
+
     to_json(os.path.join(RESULT_PATH, "valid_dirs.json"), "dirs", f)
 execute_workflow(download=True)

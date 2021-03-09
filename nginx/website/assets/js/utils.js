@@ -49,7 +49,7 @@ function update_function_caller(functions){
   function fill_aoi_dropdown(functions){
 	let aoi;
 	if(location.search == ''){
-	  aoi = "area_of_interest"
+	  aoi = "select a town"
 	}
 	else{
 	  let list = get_html_parameter_list(location.search)
@@ -68,9 +68,9 @@ function update_function_caller(functions){
 	  x.add(option)
 	}
 	x.value = aoi
-  
+
 	var val = $("#aois").val();
-	$("#aois").prepend("<option value='" + val + "' data-value='selected' selected hidden>" + val + "</option>");
+	$("#aois").prepend("<option value='" + val + "' data-value='selected' selected hidden>" + aoi + "</option>");
   
 	$("#aois").on('change', function() {
 	  var val = $("#aois").val();
