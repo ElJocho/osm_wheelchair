@@ -14,7 +14,7 @@ Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
 
 def get_logger():
     logs_path = os.path.join(DATA_PATH, "logs")
-    logging_file_path = os.path.join(logs_path, "infraustralia.log")
+    logging_file_path = os.path.join(logs_path, "osm_wheelchair.log")
     logging_config_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "logging.yaml"
     )
