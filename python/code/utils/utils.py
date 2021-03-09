@@ -4,7 +4,7 @@ from python.code.utils.definitions import DATA_PATH, logger
 
 
 def to_json(filename, key, value):
-    """Drop country results."""
+    """Drop results."""
 
     try:
         with open(filename) as file:
